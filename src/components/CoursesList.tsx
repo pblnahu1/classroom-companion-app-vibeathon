@@ -28,8 +28,9 @@ export default function CoursesList() {
           throw new Error(data?.details || data?.error || "Error fetching courses");
         }
         setCourses(data.courses || []);
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e: unknown) {
+        const err = e as { message?: string };
+        setError(err?.message || "Unknown error");
       } finally {
         setLoading(false);
       }

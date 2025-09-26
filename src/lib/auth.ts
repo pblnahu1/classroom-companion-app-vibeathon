@@ -29,7 +29,7 @@ export const authOptions: NextAuthOptions = {
   ],
   session: { strategy: "jwt" },
   callbacks: {
-    async jwt({ token, account, profile }) {
+    async jwt({ token, account }) {
       // En el primer login guardamos access_token y refresco si existe
       if (account) {
         token.accessToken = account.access_token;
@@ -39,9 +39,11 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      (session as any).accessToken = token.accessToken;
-      (session as any).expiresAt = token.expiresAt;
-      return session;
+      return {
+        ...session,
+        accessToken: token.accessToken as string | undefined,
+        expiresAt: token.expiresAt as number | undefined,
+      };
     },
   },
   pages: {

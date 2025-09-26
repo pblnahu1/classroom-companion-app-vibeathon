@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session || !(session as any).accessToken) {
+  if (!session || !session.accessToken) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing courseId" }, { status: 400 });
   }
 
-  const accessToken = (session as any).accessToken as string;
+  const accessToken = session.accessToken as string;
 
   try {
     const url = `https://classroom.googleapis.com/v1/courses/${encodeURIComponent(
@@ -35,7 +35,8 @@ export async function GET(req: NextRequest) {
 
     const data = await res.json();
     return NextResponse.json({ courseWork: data.courseWork ?? [] });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message ?? "Unknown error" }, { status: 500 });
+  } catch (err: unknown) {
+    const e = err as { message?: string };
+    return NextResponse.json({ error: e?.message ?? "Unknown error" }, { status: 500 });
   }
 }

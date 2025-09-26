@@ -4,11 +4,11 @@ import { authOptions } from "@/lib/auth";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session || !(session as any).accessToken) {
+  if (!session || !session.accessToken) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const accessToken = (session as any).accessToken as string;
+  const accessToken = session.accessToken as string;
 
   try {
     const res = await fetch(
@@ -31,7 +31,8 @@ export async function GET() {
 
     const data = await res.json();
     return NextResponse.json({ courses: data.courses ?? [] });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message ?? "Unknown error" }, { status: 500 });
+  } catch (err: unknown) {
+    const e = err as { message?: string };
+    return NextResponse.json({ error: e?.message ?? "Unknown error" }, { status: 500 });
   }
 }
